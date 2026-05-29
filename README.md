@@ -151,6 +151,149 @@ logging:
 
 Collections inherit top-level `embedder`, `vectorStore`, and `logging`. Collection-level values replace the top-level value entirely.
 
+### Required And Optional Config
+
+Required:
+
+- `embedder.provider`
+- A matching provider block, such as `lmstudio`, `ollama`, `openai`, or `voyage`
+- Provider connection fields, such as `url` and `model` for local providers, or `apiKey` and `model` for hosted providers
+- `collections` with at least one collection key
+- Each collection's `extensions`
+- Each collection's `chunking.strategy`
+- For `treesitter`, set `chunkSize` and `chunkOverlap`
+- `logging` for CLI/indexer commands
+
+Optional:
+
+- `embedder.prefix` - template name such as `code`, `docs`, `design`, `bge`, or a custom `{ index, query }` object
+- `description` - human-readable collection label
+- `exclude` - glob patterns to skip generated or irrelevant files
+- `vectorStore` - defaults to local LanceDB when omitted
+- Provider tuning such as `concurrency`, `maxRetries`, `timeout`, and `rateLimit`
+- `chunking.breadcrumb` - overrides Markdown breadcrumb formatting
+- For `markdown-header`, `maxChunkSize` defaults to 3000 and `chunkOverlap` defaults to 0
+
+## Config Examples
+
+Docs-only `.vmap.yaml` with the markdown header chunker:
+
+```yaml
+embedder:
+  provider: lmstudio
+  prefix: docs
+  lmstudio:
+    url: http://localhost:1234
+    model: nomic-embed-text-v2-moe
+    concurrency: 20
+    maxRetries: 3
+    timeout: 30000
+
+collections:
+  docs:
+    description: "Markdown documentation"
+    extensions: [.md]
+    exclude:
+      - "**/node_modules/**"
+      - "**/.vmap/**"
+      - "**/runtime/**"
+    chunking:
+      strategy: markdown-header
+      maxChunkSize: 3000
+      chunkOverlap: 0
+      breadcrumb:
+        pathSeparator: " > "
+        headerSeparator: " :: "
+        subSectionSeparator: " >> "
+        skipExtension: true
+        includeBoldParagraphs: true
+
+vectorStore:
+  provider: lancedb
+```
+
+Code-only `.vmap.yaml` with Tree-sitter chunking:
+
+```yaml
+embedder:
+  provider: lmstudio
+  prefix: code
+  lmstudio:
+    url: http://localhost:1234
+    model: nomic-embed-text-v2-moe
+    concurrency: 10
+    maxRetries: 3
+    timeout: 30000
+
+collections:
+  code:
+    description: "Application source"
+    extensions: [.php, .js, .mjs]
+    exclude:
+      - "**/vendor/**"
+      - "**/node_modules/**"
+      - "**/dist/**"
+      - "**/*.min.js"
+    chunking:
+      strategy: treesitter
+      language: auto
+      chunkSize: 4000
+      chunkOverlap: 150
+
+vectorStore:
+  provider: lancedb
+```
+
+Qdrant-backed `.vmap.yaml`:
+
+```yaml
+embedder:
+  provider: openai
+  prefix: docs
+  openai:
+    apiKey: "REPLACE_WITH_OPENAI_API_KEY"
+    model: text-embedding-3-small
+    maxRetries: 3
+    timeout: 30000
+
+collections:
+  docs:
+    description: "Markdown documentation"
+    extensions: [.md]
+    chunking:
+      strategy: markdown-header
+      maxChunkSize: 3000
+      chunkOverlap: 0
+
+vectorStore:
+  provider: qdrant
+  qdrant:
+    url: http://localhost:6333
+```
+
+vmap reads this value directly from `.vmap.yaml`; it does not expand shell environment variables in config files.
+
+### Configurable Markdown Chunker
+
+vmap includes a built-in configurable Markdown chunker. It is not a separate plugin; you customize it through the collection's `chunking` block.
+
+For Markdown files, prefer:
+
+```yaml
+chunking:
+  strategy: markdown-header
+  maxChunkSize: 3000
+  chunkOverlap: 0
+  breadcrumb:
+    pathSeparator: " > "
+    headerSeparator: " :: "
+    subSectionSeparator: " >> "
+    skipExtension: true
+    includeBoldParagraphs: true
+```
+
+The markdown header chunker splits documents by Markdown headings, keeps heading metadata, and adds a breadcrumb payload containing the file path and heading stack. When a heading section is larger than `maxChunkSize`, it splits that section by paragraphs. With `includeBoldParagraphs: true`, short whole-line bold paragraphs and first-line quoted/code labels can become sub-section breadcrumbs, which improves retrieval for dense notes and protocol files.
+
 ## Indexing
 
 ```bash
@@ -209,8 +352,7 @@ Example MCP server config:
     "vmap": {
       "command": "node",
       "args": [
-        "/Users/duskov/Projects/IIT/scripts/vmap/mcp-server.mjs",
-        "/path/to/repo"
+        "/Users/duskov/Projects/IIT/scripts/vmap/mcp-server.mjs"
       ],
       "env": {}
     }
@@ -218,11 +360,19 @@ Example MCP server config:
 }
 ```
 
-The optional path argument preloads a config root. Tool calls can still discover other roots from their `path` or `files` arguments.
+No repository path is passed to the MCP server. vmap resolves the relevant config root at tool-call time by walking up from the provided `path` or `files` argument until it finds `.vmap.yaml`.
 
-## Watcher
+## Keeping The Index Current
 
-Keep indexes current automatically:
+The preferred agent workflow is to put a rule in the repo's steering file, agent instructions, or a vmap-specific skill:
+
+```md
+After changing indexed files, call `vmap_update_collection` with the changed absolute file paths. For moved files, include both the old missing path and the new path.
+```
+
+Agents usually obey this kind of rule reliably, and targeted updates avoid extra reindex work.
+
+The watcher is optional. Run it in a separate terminal only when you want a background process to keep the index current:
 
 ```bash
 node watcher.mjs /path/to/repo
@@ -260,7 +410,7 @@ node cli.mjs /path/to/repo reset all
 MCP not loading?
 
 ```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node mcp-server.mjs /path/to/repo
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node mcp-server.mjs
 ```
 
 Config not found?
