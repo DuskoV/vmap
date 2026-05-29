@@ -473,6 +473,16 @@ node benchmark.mjs benchmarks/.vmap_<name>.yaml
 
 Keep the generated `machine`, `model`, `provider`, `chunker`, `store`, `top1`, `top3`, and timing fields in the results files. They are the evidence needed to understand whether a change is better, faster, or just different.
 
+## License
+
+vmap is released under the Apache License, Version 2.0.
+
+Copyright 2026 Dusko Vuksanovic.
+
+You may use, modify, distribute, and sell vmap, including as part of commercial products or services, subject to the Apache-2.0 license terms. Redistributed copies and derivative works must preserve the applicable copyright, license, and attribution notices, including the credit in `NOTICE`.
+
+vmap is provided on an "AS IS" basis, without warranties or conditions, and contributors are not liable for damages arising from use, redistribution, or modification except where required by law or separate written agreement.
+
 ## Requirements
 
 - Node.js 18+

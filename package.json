@@ -3,6 +3,7 @@
   "version": "0.0.2",
   "type": "module",
   "description": "vmap - Semantic code/docs search MCP server",
+  "license": "Apache-2.0",
   "scripts": {
     "postinstall": "node scripts/install-lancedb-native.mjs"
   },
