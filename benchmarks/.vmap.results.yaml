@@ -1,0 +1,79 @@
+timestamp: '2026-04-04T03:56:40.636Z'
+machine:
+  platform: darwin
+  arch: x64
+  cpu: Apple M4 Pro
+  cores: 14
+  ram: 48GB
+config:
+  model: nomic-embed-text-v2-moe
+  provider: lmstudio
+  chunker: null
+  store: lancedb
+collections:
+  docs:
+    model: nomic-embed-text-v2-moe
+    chunker: markdown-header
+    store: lancedb
+    results:
+      - prefix: default
+        top1: 1
+        top3: 1
+        embedMs: 240
+        embedAvgMs: 40
+        writeMs: 22
+        queryMs: 136
+        queryAvgMs: 17
+        totalMs: 398
+      - prefix: docs
+        top1: 1
+        top3: 1
+        embedMs: 180
+        embedAvgMs: 30
+        writeMs: 16
+        queryMs: 113
+        queryAvgMs: 14
+        totalMs: 309
+      - prefix: code
+        top1: 0.875
+        top3: 1
+        embedMs: 181
+        embedAvgMs: 30
+        writeMs: 17
+        queryMs: 111
+        queryAvgMs: 14
+        totalMs: 309
+    best: docs
+  code:
+    model: nomic-embed-text-v2-moe
+    chunker: treesitter
+    store: lancedb
+    results:
+      - prefix: default
+        top1: 0.875
+        top3: 1
+        embedMs: 255
+        embedAvgMs: 32
+        writeMs: 18
+        queryMs: 89
+        queryAvgMs: 11
+        totalMs: 362
+      - prefix: code
+        top1: 0.875
+        top3: 1
+        embedMs: 249
+        embedAvgMs: 31
+        writeMs: 13
+        queryMs: 103
+        queryAvgMs: 13
+        totalMs: 365
+      - prefix: docs
+        top1: 0.875
+        top3: 1
+        embedMs: 248
+        embedAvgMs: 31
+        writeMs: 17
+        queryMs: 103
+        queryAvgMs: 13
+        totalMs: 368
+    best: default

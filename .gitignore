@@ -1,0 +1,4 @@
+node_modules/
+.vmap/
+.DS_Store
+*.log

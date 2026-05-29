@@ -1,0 +1,56 @@
+# .vmap.yaml — place in the root of the directory tree to index
+# Config is auto-discovered by walking up from any file path.
+#
+# Inheritance: collections inherit top-level embedder, vectorStore, logging.
+# If a collection defines its own embedder or chunking, it REPLACES the
+# top-level value entirely (no deep merge). This avoids stale keys when
+# switching providers.
+
+embedder:
+  provider: lmstudio
+  # prefix: docs  # optional: embedding prefix template (default, code, docs, design)
+  lmstudio:
+    url: http://localhost:1234
+    model: nomic-embed-text-v2-moe
+    concurrency: 20
+    maxRetries: 3
+    timeout: 30000
+  # ollama:
+  #   url: http://localhost:11434
+  #   model: nomic-embed-text
+  # openai:
+  #   apiKey: ""
+  #   model: text-embedding-3-small
+
+collections:
+  code:
+    description: "Source code files"
+    extensions: [.php, .js]
+    exclude:
+      - "**/vendor/**"
+      - "**/node_modules/**"
+      - "**/dist/**"
+    chunking:
+      strategy: treesitter
+      language: auto
+      chunkSize: 4000
+      chunkOverlap: 150
+  docs:
+    description: "Markdown documentation"
+    extensions: [.md]
+    exclude:
+      - "**/fixtures/**"
+      - "**/runtime/**"
+    chunking:
+      strategy: markdown-header
+      maxChunkSize: 3000
+      chunkOverlap: 0
+
+vectorStore:
+  provider: lancedb
+  # lancedb options are auto-configured (DB stored in .vmap/db)
+
+logging:
+  level: info
+  console: true
+  file: false

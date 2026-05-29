@@ -1,0 +1,44 @@
+{
+  "collections": {
+    "test": {
+      "name": "test-string-prefix",
+      "paths": ["fixtures/"],
+      "exclude": [],
+      "extensions": [".md"],
+      
+      "embedder": {
+        "provider": "lmstudio",
+        "prefix": "code",
+        "lmstudio": {
+          "url": "http://localhost:1234",
+          "model": "test-model",
+          "maxRetries": 1,
+          "timeout": 5000
+        }
+      },
+      
+      "chunking": {
+        "strategy": "markdown",
+        "chunkSize": 1000,
+        "chunkOverlap": 100
+      }
+    }
+  },
+  
+  "qdrant": {
+    "url": "http://localhost:6333",
+    "timeout": 10000
+  },
+  
+  "state": {
+    "hashFile": ".test/hashes.json",
+    "progressFile": ".test/progress.json",
+    "logDir": ".test/logs"
+  },
+  
+  "logging": {
+    "level": "error",
+    "console": false,
+    "file": false
+  }
+}

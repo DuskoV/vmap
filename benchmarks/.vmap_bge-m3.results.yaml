@@ -1,0 +1,55 @@
+timestamp: '2026-04-04T03:53:46.795Z'
+machine:
+  platform: darwin
+  arch: x64
+  cpu: Apple M4 Pro
+  cores: 14
+  ram: 48GB
+config:
+  model: text-embedding-bge-m3
+  provider: lmstudio
+  chunker: treesitter
+  store: lancedb
+  collection: code
+  extensions:
+    - .php
+  sampleSize: 8
+  queryCount: 8
+results:
+  - prefix: default
+    top1: 0.875
+    top3: 0.875
+    mrr: null
+    embedMs: 998
+    embedAvgMs: 125
+    writeMs: 39
+    queryMs: 167
+    queryAvgMs: 21
+    totalMs: 1204
+    vsBaseline:
+      speedDelta: '-18.0%'
+      top1Delta: 0.0pp
+  - prefix: code
+    top1: 0.75
+    top3: 0.875
+    mrr: null
+    embedMs: 935
+    embedAvgMs: 117
+    writeMs: 15
+    queryMs: 149
+    queryAvgMs: 19
+    totalMs: 1099
+    vsBaseline:
+      speedDelta: 188.5%
+      top1Delta: '-12.5pp'
+  - prefix: bge
+    top1: 0.75
+    top3: 0.875
+    mrr: null
+    embedMs: 945
+    embedAvgMs: 118
+    writeMs: 16
+    queryMs: 161
+    queryAvgMs: 20
+    totalMs: 1122
+best: code

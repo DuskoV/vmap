@@ -1,0 +1,99 @@
+{
+  "collections": {
+    "docs": {
+      "name": "iit-docs",
+      "paths": [".kiro/", "md/"],
+      "exclude": ["**/node_modules/**", "**/_litter/**", "**/logs/**"],
+      "extensions": [".md"],
+      
+      "embedder": {
+        "provider": "lmstudio",
+        "prefix": "docs",
+        "ollama": {
+          "url": "http://localhost:11434",
+          "model": "nomic-embed-text",
+          "maxRetries": 3,
+          "timeout": 30000
+        },
+        "lmstudio": {
+          "url": "http://localhost:1234",
+          "model": "text-embedding-qwen3-embedding-8b",
+          "maxRetries": 3,
+          "timeout": 30000
+        },
+        "openai": {
+          "apiKey": "",
+          "model": "text-embedding-3-small",
+          "maxRetries": 3,
+          "timeout": 30000
+        }
+      },
+      
+      "chunking": {
+        "strategy": "treesitter",
+        "language": "markdown",
+        "chunkSize": 3000,
+        "chunkOverlap": 400
+      }
+    },
+    
+    "code": {
+      "name": "iit-code",
+      "paths": ["www/"],
+      "exclude": ["**/vendor/**", "**/node_modules/**", "**/_tax/**", "**/tests/playwright/**"],
+      "extensions": [".php"],
+      
+      "embedder": {
+        "provider": "lmstudio",
+        "prefix": "code",
+        "lmstudio": {
+          "url": "http://localhost:1235",
+          "model": "qwen3-coder-8b",
+          "maxRetries": 3,
+          "timeout": 30000
+        },
+        "ollama": {
+          "url": "http://localhost:11434",
+          "model": "codellama",
+          "maxRetries": 3,
+          "timeout": 30000
+        },
+        "openai": {
+          "apiKey": "",
+          "model": "text-embedding-3-small",
+          "maxRetries": 3,
+          "timeout": 30000
+        }
+      },
+      
+      "chunking": {
+        "strategy": "treesitter",
+        "language": "php",
+        "chunkSize": 2048,
+        "chunkOverlap": 200
+      }
+    }
+  },
+  
+  "vectorStore": {
+    "provider": "lancedb",
+    "lancedb": {
+      "path": ".codecompass/db"
+    },
+    "qdrant": {
+      "url": "http://localhost:6333"
+    }
+  },
+  
+  "state": {
+    "hashFile": ".kiro/mcp/codecompass/hashes.json",
+    "progressFile": ".kiro/mcp/codecompass/progress.json",
+    "logDir": ".kiro/mcp/codecompass/logs"
+  },
+  
+  "logging": {
+    "level": "info",
+    "console": true,
+    "file": true
+  }
+}

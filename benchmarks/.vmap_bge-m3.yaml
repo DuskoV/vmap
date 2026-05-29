@@ -1,0 +1,53 @@
+embedder:
+  provider: lmstudio
+  lmstudio:
+    url: http://localhost:1234
+    model: text-embedding-bge-m3
+    concurrency: 20
+
+collections:
+  docs:
+    description: "Markdown documentation"
+    extensions: [.md]
+    exclude: []
+    chunking:
+      strategy: markdown-header
+      maxChunkSize: 3000
+  code:
+    description: "PHP source code"
+    extensions: [.php]
+    exclude: []
+    chunking:
+      strategy: treesitter
+      language: php
+      chunkSize: 4000
+
+vectorStore:
+  provider: lancedb
+
+benchmark:
+  baseline: .vmap.results.yaml
+  docs:
+    sampleSize: 6
+    prefixes: [default, docs, bge]
+    queries:
+      - "user authentication login flow"
+      - "database schema tables and columns"
+      - "API endpoint for creating orders"
+      - "email notification templates"
+      - "deployment docker configuration"
+      - "search filtering and pagination"
+      - "password reset token expiration"
+      - "rate limiting per user"
+  code:
+    sampleSize: 8
+    prefixes: [default, code, bge]
+    queries:
+      - "database transaction with rollback"
+      - "user authentication and password validation"
+      - "product search with category filtering"
+      - "order creation from shopping cart"
+      - "payment processing credit card charge"
+      - "access control admin permissions"
+      - "active record model with relations"
+      - "queue job for sending email"
