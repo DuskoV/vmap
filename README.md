@@ -399,6 +399,80 @@ node cli.mjs /path/to/repo reset all
 - Optional Qdrant backend for server-backed vector storage
 - Prefix templates for model-specific indexing and query text
 
+## Benchmarks
+
+vmap includes benchmark fixtures under `benchmarks/`. They are meant for comparing embedding models, prefix templates, chunking strategies, and vector stores against the same sample documents and query set.
+
+Run the default benchmark first to create the baseline results file:
+
+```bash
+cd scripts/vmap
+node benchmark.mjs benchmarks
+```
+
+That writes:
+
+```text
+benchmarks/.vmap.results.yaml
+```
+
+To compare another model or config, create another config file next to the baseline, for example:
+
+```text
+benchmarks/.vmap_bge-m3.yaml
+```
+
+Point it at the baseline:
+
+```yaml
+benchmark:
+  baseline: .vmap.results.yaml
+  docs:
+    sampleSize: 6
+    prefixes: [default, docs, bge]
+    queries:
+      - "user authentication login flow"
+      - "database schema tables and columns"
+  code:
+    sampleSize: 8
+    prefixes: [default, code, bge]
+    queries:
+      - "database transaction with rollback"
+      - "user authentication and password validation"
+```
+
+Then run the new config without a collection key:
+
+```bash
+node benchmark.mjs benchmarks/.vmap_bge-m3.yaml
+```
+
+Omitting the collection key is intentional. It benchmarks every configured collection in the file, so docs and code are measured together and the output includes the full comparison statistics. Only pass a collection key, such as `code`, when you are intentionally doing a narrow local experiment.
+
+The benchmark runner writes a matching results file:
+
+```text
+benchmarks/.vmap_bge-m3.results.yaml
+```
+
+### Adding More Benchmarks
+
+When adding a new benchmark comparison, include both the config and its results file:
+
+- `benchmarks/.vmap_<name>.yaml`
+- `benchmarks/.vmap_<name>.results.yaml`
+
+Use the same fixture files, `sampleSize`, query lists, and collection keys as the baseline unless the benchmark is explicitly testing the query set itself. This keeps the analytics meaningful because the new run is compared against the existing baseline on the same inputs.
+
+Treat the baseline and candidate benchmark as a paired comparison. If you change the benchmark corpus, sample sizes, queries, chunking strategy, or vector store, rerun the baseline and the new config back-to-back in the same environment before comparing results:
+
+```bash
+node benchmark.mjs benchmarks/.vmap.yaml
+node benchmark.mjs benchmarks/.vmap_<name>.yaml
+```
+
+Keep the generated `machine`, `model`, `provider`, `chunker`, `store`, `top1`, `top3`, and timing fields in the results files. They are the evidence needed to understand whether a change is better, faster, or just different.
+
 ## Requirements
 
 - Node.js 18+
