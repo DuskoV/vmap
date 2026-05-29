@@ -77,6 +77,14 @@ cd scripts/vmap
 npm install
 ```
 
+vmap loads only the backend selected in `.vmap.yaml`. The default `vectorStore.provider: lancedb` uses `@lancedb/lancedb`, which is installed by `npm install`; LanceDB also installs its platform native package through npm optional dependencies, so avoid `--omit=optional` when using the default backend. `vectorStore.provider: qdrant` loads `@qdrant/js-client-rest`; normal installs include it as an optional dependency, but installs run with `--omit=optional` must add it explicitly:
+
+```bash
+npm install @qdrant/js-client-rest
+```
+
+The built-in embedders (`lmstudio`, `ollama`, `openai`, and `voyage`) use HTTP APIs directly. They need the configured URL or API key and model, not LangChain packages. For `provider: custom`, vmap imports `embedder.customPath` or `vectorStore.customPath` relative to the discovered `.vmap.yaml` root, so keep those custom modules in the indexed repo.
+
 Place `.vmap.yaml` at the root of the directory tree you want to index. vmap auto-discovers the config by walking up from any path passed to the CLI or MCP tools.
 
 Index everything under a config root:
